@@ -1,0 +1,16 @@
+BUILD
+BUILD*
+build
+build2
+external
+.project
+*.h5
+*.user
+.kdev4
+prealma.kdev4
+files.zip
+_metadata
+.clang_complete
+.vscode
+examples_output
+test_resources

@@ -1,0 +1,6 @@
+Compound: Ge
+2nd IFC supercell: (n1,n2,n3) = 5 5 5
+3rd IFC supercell: (n1',n2',n3', cutoff) = 5 5 5 -5
+# Comments: published in Phys. Rev. B 91 (2015) 085202
+# files.zip not available. Computed using VASP PAW_LDA datasets.
+# Added by J. Carrete on 2015-10-16.

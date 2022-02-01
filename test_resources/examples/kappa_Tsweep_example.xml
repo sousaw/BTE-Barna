@@ -1,0 +1,30 @@
+<Tsweep>
+
+  <!-- OPTIONAL. Specifies path to H5 repository. -->
+  <!-- Equals the launch directory when omitted. -->
+  <H5repository root_directory=".."/>
+
+  <!-- Specifies material information. -->
+  <!-- Directory is relative to H5 repository directory. -->
+  <compound directory="Si" base="Si" gridA="12" gridB="12" gridC="12"/>
+
+  <!-- Specifies temperature sweep. Type can be "log" or "lin". -->
+  <sweep type="lin" start="100" stop="1000" points="10"/>
+
+  <!-- OPTIONAL. Axis along which to compute conductivities. -->
+  <!-- Program will output tensor elements when axis is omitted. -->
+  <transportAxis x="0" y="0" z="1"/>
+
+  <!-- OPTIONAL. Obtains full BTE conductivities in addition to RTA solutions -->
+  <!--           by solving linear system either iteratively or directly. -->
+  <fullBTE iterative="true"/>
+
+  <!-- OPTIONAL. Outputs heat capacities in addition to conductivities. -->
+  <outputHeatCapacity/>
+
+  <!-- OPTIONAL. Specifies desired location for writing output. -->
+  <!-- When omitted, directory and file names will be created automatically. -->
+  <!-- Directory is relative to launch directory. -->
+  <target directory="examples_output/kappa_Tsweep/Si" file="AUTO"/>
+
+</Tsweep>

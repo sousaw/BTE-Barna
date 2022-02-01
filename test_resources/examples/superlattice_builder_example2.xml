@@ -1,0 +1,72 @@
+<!-- Example definition of a binary superlattice. -->
+
+<superlattice>
+
+  <!-- OPTIONAL. Specifies path to repository containing folders with force constants. -->
+  <!-- Equals the current work directory when omitted. -->
+  <materials_repository root_directory=".."/>
+
+  <!-- Specify desired number of divisions for wavevector grid. -->
+  <!-- Applies to both components of the superlattice. -->
+  <gridDensity A="8" B="8" C="8"/>
+
+  <!-- Main axis of the superlattice. -->
+  <!-- na, nb, and nc (integers) specify the direction. -->
+  <!-- nqline specifies number of q points in the 1D Brillouin zone -->
+  <!-- used to build the Green's Function. Should be odd and at least 501.-->
+  <normal na="0" nb="1" nc="1" nqline="501"/>
+
+  <!-- Specify both compound names within the repository. -->
+  <compound name="GaAs"/>
+  <compound name="InAs"/>
+
+  <!-- OPTIONAL. If specified, do not deal with three-phonon processes. -->
+  <!-- <skip3ph/> -->
+
+  <!-- Specify the concentrations of the second compound in each layer. -->
+  <!-- NOTE: This is a physics-based profile that properly accounts for -->
+  <!--       natural In segregation during superlattice growth. -->
+  <layer mixfraction="0.0000000000"/>
+  <layer mixfraction="0.1563524998"/>
+  <layer mixfraction="0.1250819998"/>
+  <layer mixfraction="0.1000655999"/>
+  <layer mixfraction="0.0800524799"/>
+  <layer mixfraction="0.0640419839"/>
+  <layer mixfraction="0.0512335871"/>
+  <layer mixfraction="0.0409868697"/>
+  <layer mixfraction="0.0327894958"/>
+  <layer mixfraction="0.0262315966"/>
+  <layer mixfraction="0.0209852773"/>
+  <layer mixfraction="0.0167882218"/>
+  <layer mixfraction="0.0134305775"/>
+  <layer mixfraction="0.0107444620"/>
+  <layer mixfraction="0.0085955696"/>
+  <layer mixfraction="0.0068764557"/>
+  <layer mixfraction="0.0055011645"/>
+  <layer mixfraction="0.0044009316"/>
+  <layer mixfraction="0.0035207453"/>
+  <layer mixfraction="0.0028165962"/>
+  <layer mixfraction="0.0022532770"/>
+  <layer mixfraction="0.0018026216"/>
+  <layer mixfraction="0.0014420973"/>
+  <layer mixfraction="0.0011536778"/>
+  <layer mixfraction="0.0009229423"/>
+  <layer mixfraction="0.0007383538"/>
+  <layer mixfraction="0.0005906830"/>
+  <layer mixfraction="0.0004725464"/>
+  <layer mixfraction="0.0003780371"/>
+  <layer mixfraction="0.0003024297"/>
+  <layer mixfraction="0.0002419438"/>
+  <layer mixfraction="0.0001935550"/>
+  <layer mixfraction="0.0001548440"/>
+  <layer mixfraction="0.0001238752"/>
+  <layer mixfraction="0.0000991002"/>
+  <layer mixfraction="0.0000792801"/>
+
+  <!-- OPTIONAL. Specifies directory for writing HDF5 file. -->
+  <!-- Will be determined automatically when omitted. -->
+  <!-- (Name of HDF5 file is always created automatically.) -->
+  <!-- Directory is relative to current work directory. -->
+  <target directory="../InGaAs_superlattice"/>
+
+</superlattice>

@@ -1,0 +1,48 @@
+<!-- Example definition of a binary superlattice. -->
+
+<superlattice>
+
+  <!-- OPTIONAL. Specifies path to repository containing folders with force constants. -->
+  <!-- Equals the current work directory when omitted. -->
+  <materials_repository root_directory=".."/>
+
+  <!-- Specify desired number of divisions for wavevector grid. -->
+  <!-- Applies to both components of the superlattice. -->
+  <gridDensity A="8" B="8" C="8"/>
+
+  <!-- Main axis of the superlattice. -->
+  <!-- na, nb, and nc (integers) specify the direction. -->
+  <!-- nqline specifies number of q points in the 1D Brillouin zone -->
+  <!-- used to build the Green's Function. Should be odd and at least 501.-->
+  <normal na="0" nb="1" nc="1" nqline="501"/>
+
+  <!-- Specify both compound names within the repository. -->
+  <compound name="GaAs"/>
+  <compound name="InAs"/>
+
+  <!-- OPTIONAL. If specified, do not deal with three-phonon processes. -->
+  <!-- <skip3ph/> -->
+
+  <!-- Specify the concentrations of the second compound in each layer. -->
+  <!-- NOTE: What follows is a nonphysical profile -->
+  <!-- (limited number of layers with perfect material contrast) -->
+  <!-- solely used fror illustration purposes to speed up the calculations. -->
+  
+  <layer mixfraction="1"/>
+  <layer mixfraction="1"/>
+  <layer mixfraction="0"/>
+  <layer mixfraction="0"/>
+  <layer mixfraction="0"/>
+  <layer mixfraction="0"/>
+  <layer mixfraction="0"/>
+  <layer mixfraction="0"/>
+  <layer mixfraction="0"/>
+  <layer mixfraction="0"/>
+
+  <!-- OPTIONAL. Specifies directory for writing HDF5 file. -->
+  <!-- Will be determined automatically when omitted. -->
+  <!-- (Name of HDF5 file is always created automatically.) -->
+  <!-- Directory is relative to current work directory. -->
+  <target directory="../InGaAs_superlattice"/>
+
+</superlattice>

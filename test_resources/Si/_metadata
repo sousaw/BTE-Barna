@@ -1,0 +1,6 @@
+Compound: Si
+2nd IFC supercell: (n1,n2,n3) = 5 5 5
+3rd IFC supercell: (n1',n2',n3', cutoff) = 5 5 5 -5
+# Comments: published in Computer Physics Communications 185 (2014) 1747.
+# Added by J. Carrete on 2015-10-16. Known to yield a rather high value of
+# the thermal conductivity [~170 W / (m K)]

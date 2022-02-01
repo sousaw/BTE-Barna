@@ -1,0 +1,23 @@
+This fork of almaBTE was created by
+
+Martí Raya Moreno <Marti.Raya@uab.cat>
+
+The ALMA Project was started at CEA-Grenoble in 2015. The original developers are:
+
+Natalio Mingo <natalio.mingo@cea.fr>
+Jesús Carrete <jcarrete@gmail.com>
+Bjorn Vermeersch <bjorn.vermeersch@cea.fr>
+
+With contributions from:
+
+Bonny Dongre <Bonny.Dongre@ruhr-uni-bochum.de>
+Ankita Katre <ankitamkatre@gmail.com>
+Georg Madsen <Georg.Madsen@ruhr-uni-bochum.de>
+Tao Wang <tao.wang@icams.ruhr-uni-bochum.de>
+
+Some of the ideas implemented in ALMA were taken from ShengBTE, an earlier solver of the Boltzmann transport equation. ShengBTE was developed by:
+
+Wu Li <wu.li.phys2011@gmail.com>
+Jesús Carrete <jcarrete@gmail.com>
+Nebil Ayape Katcho <nebil.katcho@gmail.com>
+Natalio Mingo <natalio.mingo@cea.fr>

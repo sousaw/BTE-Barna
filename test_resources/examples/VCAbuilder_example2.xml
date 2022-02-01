@@ -1,0 +1,24 @@
+<!-- Illustrates creation of a bi-atomic single crystal. -->
+
+<singlecrystal>
+
+  <!-- OPTIONAL. Specifies path to repository containing folders with force constants. -->
+  <!-- Equals the current work directory when omitted. -->
+  <materials_repository root_directory=".."/>
+
+  <!-- Specify compound name within the repository. -->
+  <compound name="GaAs"/>
+
+  <!-- Specify desired number of divisions for wavevector grid. -->
+  <gridDensity A="12" B="12" C="12"/>
+
+  <!-- OPTIONAL. Specifies directory for writing HDF5 file. -->
+  <!-- Will be determined automatically when omitted. -->
+  <!-- (Name of HDF5 file is always created automatically.) -->
+  <!-- Directory is relative to current work directory. -->
+  <target directory="../GaAs"/>
+
+  <!-- OPTIONAL. Forces rerun and rewrite even if HDF5 file already exists. -->
+  <overwrite/>
+
+</singlecrystal>

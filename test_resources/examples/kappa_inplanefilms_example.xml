@@ -1,0 +1,30 @@
+<inplanefilmsweep>
+
+  <!-- OPTIONAL. Specifies path to H5 repository. -->
+  <!-- Equals the launch directory when omitted. -->
+  <H5repository root_directory=".."/>
+
+  <!-- Specifies material information. -->
+  <!-- Directory is relative to H5 repository directory. -->
+  <compound directory="InGaAs" base="In0.53Ga0.47As" gridA="12" gridB="12" gridC="12"/>
+
+  <!-- Specifies sweep of film thicknesses. Type can be "log" or "lin". -->
+  <sweep type="log" start="1e-9" stop="1e-4" points="51"/>
+
+  <!-- Cartesian vector along which the conductivity should be computed. -->
+  <transportAxis x="1" y="0" z="0"/>
+
+  <!-- Cartesian vector describing the film normal. -->
+  <!-- Must be orthogonal to transportAxis. -->
+  <normalAxis x="0" y="0" z="1"/>
+
+  <!-- OPTIONAL. Sets specularity of film boundaries. -->
+  <!-- Default value is 0, meaning fully diffuse boundary scattering. -->
+  <specularity value="0.2"/>
+
+  <!-- OPTIONAL. Specifies desired location for writing output. -->
+  <!-- When omitted, directory and file names will be created automatically. -->
+  <!-- Directory is relative to launch directory. -->
+  <target directory="examples_output/kappa_inplanefilms/InGaAs" file="AUTO"/>
+
+</inplanefilmsweep>

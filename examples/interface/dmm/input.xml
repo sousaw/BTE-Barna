@@ -1,0 +1,7 @@
+<RTA_MC2d>
+    <geometry file="beam.xml"/>
+    <time dt="20000" maxtime="400000"/>
+    <material name="gph" database="graphene_80_80_1.h5"      thickness="0.335" T0="300.0"/>
+    <material name="sandwich" database="sandwich_40_40_1.h5" thickness="1.001" T0="300.0"/>
+    <particles N="1000000"/>
+</RTA_MC2d>

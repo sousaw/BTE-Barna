@@ -1,0 +1,38 @@
+<!-- Illustrates Monte Carlo simulation of single layer structure. -->
+
+<materials>
+
+  <!-- OPTIONAL. Specifies path to H5 repository. -->
+  <!-- Equals the current work directory when omitted. -->
+  <H5repository root_directory=".."/>
+
+  <!-- Specify information of all materials to be used in the simulation. -->
+  <!-- Directory is relative to H5 repository directory. -->
+  <material label="pureSi" directory="Si" compound="Si" gridA="12" gridB="12" gridC="12"/>
+
+</materials>
+
+<layers>
+
+  <!-- Construct layer structure using the materials above. -->
+  <!-- The index (starting from 1) specifies the order from "top" to "bottom". --> 
+  <!-- Thicknesses are expressed in nm. -->
+  <layer label="Si_slab" index="1" material="pureSi" thickness="200.0"/>
+
+</layers>
+
+<simulation>
+
+  <!-- Set temperature differential, number of particles, and number of space bins. -->
+  <!-- Reservoirs are set to Ttop = Tref + deltaT/2, Tbottom = Tref - deltaT/2. -->
+  <!-- The reference temperature Tref is supplied as command line argument. -->
+  <core deltaT="2.0" particles="1e6" bins="200"/>
+
+  <!-- Set cartesian vector that describes the normal to the layer structure. -->
+  <transportAxis x="0" y="0" z="1"/>
+
+  <!-- OPTIONAL. Specifies location where to write temperature profiles. -->
+  <!--           Directory is relative to current work directory. -->
+  <target directory="examples_output/steady_montecarlo1d/example1"/>
+
+</simulation>

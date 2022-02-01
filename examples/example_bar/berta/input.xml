@@ -1,0 +1,23 @@
+<beRTAMC2D>
+    <geometry file="beam.xml"/>
+    <time dt="0.25" maxtime="1000"/>
+    <material name="black_P" database="phosphorene_50_50_1.h5" thickness="0.533">
+        <propagator T="300" file="phosphorene_50_50_1_300K_0.25ps.P.eigen.bin"/>
+    </material>
+    <Eeff Ed="5.39836e-25"/>
+    <spectral>
+      <resolution ticks="500"/>
+      <time t="200."/>
+      <time t="550."/>
+      <location bin="5"/>
+      <location bin="6"/>
+      <location bin="7"/>
+      <location bin="8"/>
+      <location bin="9"/>
+      <location bin="99"/>
+      <location bin="100"/>
+      <location bin="101"/>
+      <location bin="102"/>
+      <location bin="103"/>
+    </spectral>
+</beRTAMC2D>

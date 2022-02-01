@@ -1,0 +1,100 @@
+<!-- Example definition of a binary superlattice. -->
+
+<superlattice>
+
+  <!-- OPTIONAL. Specifies path to repository containing folders with force constants. -->
+  <!-- Equals the current work directory when omitted. -->
+  <materials_repository root_directory=".."/>
+
+  <!-- Specify desired number of divisions for wavevector grid. -->
+  <!-- Applies to both components of the superlattice. -->
+  <gridDensity A="8" B="8" C="8"/>
+
+  <!-- Main axis of the superlattice. -->
+  <!-- na, nb, and nc (integers) specify the direction. -->
+  <!-- nqline specifies number of q points in the 1D Brillouin zone -->
+  <!-- used to build the Green's Function. Should be odd and at least 501.-->
+  <normal na="0" nb="1" nc="1" nqline="501"/>
+
+  <!-- Specify both compound names within the repository. -->
+  <compound name="Si"/>
+  <compound name="Ge"/>
+
+  <!-- Specify the concentrations of the second compound in each layer. -->
+  <layer mixfraction="0.009649"/>
+  <layer mixfraction="0.009332"/>
+  <layer mixfraction="0.009029"/>
+  <layer mixfraction="0.008741"/>
+  <layer mixfraction="0.008467"/>
+  <layer mixfraction="0.008205"/>
+  <layer mixfraction="0.007955"/>
+  <layer mixfraction="0.007716"/>
+  <layer mixfraction="0.007487"/>
+  <layer mixfraction="0.007267"/>
+  <layer mixfraction="0.007058"/>
+  <layer mixfraction="0.006856"/>
+  <layer mixfraction="0.006663"/>
+  <layer mixfraction="0.006476"/>
+  <layer mixfraction="0.006298"/>
+  <layer mixfraction="0.006126"/>
+  <layer mixfraction="0.005960"/>
+  <layer mixfraction="0.005800"/>
+  <layer mixfraction="0.005647"/>
+  <layer mixfraction="0.005498"/>
+  <layer mixfraction="0.005356"/>
+  <layer mixfraction="0.005218"/>
+  <layer mixfraction="0.005085"/>
+  <layer mixfraction="0.025507"/>
+  <layer mixfraction="0.032527"/>
+  <layer mixfraction="0.021679"/>
+  <layer mixfraction="0.020506"/>
+  <layer mixfraction="0.019440"/>
+  <layer mixfraction="0.018466"/>
+  <layer mixfraction="0.017573"/>
+  <layer mixfraction="0.016750"/>
+  <layer mixfraction="0.015991"/>
+  <layer mixfraction="0.015288"/>
+  <layer mixfraction="0.014635"/>
+  <layer mixfraction="0.014026"/>
+  <layer mixfraction="0.013458"/>
+  <layer mixfraction="0.012927"/>
+  <layer mixfraction="0.012428"/>
+  <layer mixfraction="0.011959"/>
+  <layer mixfraction="0.011517"/>
+  <layer mixfraction="0.011101"/>
+  <layer mixfraction="0.010708"/>
+  <layer mixfraction="0.010336"/>
+  <layer mixfraction="0.009983"/>
+  <layer mixfraction="0.009649"/>
+  <layer mixfraction="0.009332"/>
+  <layer mixfraction="0.009029"/>
+  <layer mixfraction="0.008741"/>
+  <layer mixfraction="0.008467"/>
+  <layer mixfraction="0.008205"/>
+  <layer mixfraction="0.007955"/>
+  <layer mixfraction="0.007716"/>
+  <layer mixfraction="0.007487"/>
+  <layer mixfraction="0.007267"/>
+  <layer mixfraction="0.007058"/>
+  <layer mixfraction="0.006856"/>
+  <layer mixfraction="0.006663"/>
+  <layer mixfraction="0.006476"/>
+  <layer mixfraction="0.006298"/>
+  <layer mixfraction="0.006126"/>
+  <layer mixfraction="0.005960"/>
+  <layer mixfraction="0.005800"/>
+  <layer mixfraction="0.005647"/>
+  <layer mixfraction="0.005498"/>
+  <layer mixfraction="0.005356"/>
+  <layer mixfraction="0.005218"/>
+  <layer mixfraction="0.005085"/>
+  <layer mixfraction="0.025507"/>
+  <layer mixfraction="0.032527"/>
+
+  <!-- OPTIONAL. Specifies directory for writing HDF5 file. -->
+  <!-- Will be determined automatically when omitted. -->
+  <!-- (Name of HDF5 file is always created automatically.) -->
+  <!-- Directory is relative to current work directory. -->
+  <target directory="../SiGe_superlattice"/>
+
+</superlattice>

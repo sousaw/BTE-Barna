@@ -1,0 +1,57 @@
+<!-- Illustrates capabilities for resolving spectral heat flux. -->
+
+<materials>
+
+  <!-- OPTIONAL. Specifies path to H5 repository. -->
+  <!-- Equals the current work directory when omitted. -->
+  <H5repository root_directory=".."/>
+
+  <!-- Specify information of all materials to be used in the simulation. -->
+  <!-- Directory is relative to H5 repository directory. -->
+  <material label="pureSi" directory="Si" compound="Si" gridA="12" gridB="12" gridC="12"/>
+  <material label="pureGe" directory="Ge" compound="Ge" gridA="12" gridB="12" gridC="12"/>
+
+</materials>
+
+<layers>
+
+  <!-- Construct layer structure using the materials above. -->
+  <!-- The index (starting from 1) specifies the order from "top" to "bottom". -->
+  <!-- Thicknesses are expressed in nm. -->
+  <layer label="cap" index="1" material="pureSi" thickness="100.0"/>
+  <layer label="device" index="2" material="pureGe" thickness="100.0"/>
+  <layer label="substrate" index="3" material="pureSi" thickness="100.0"/>
+
+</layers>
+
+<simulation>
+
+  <!-- Set temperature differential, number of particles, and number of space bins. -->
+  <!-- Reservoirs are set to Ttop = Tref + deltaT/2, Tbottom = Tref - deltaT/2. -->
+  <!-- The reference temperature Tref is supplied as command line argument. -->
+  <core deltaT="2.0" particles="1e5" bins="300"/>
+
+  <!-- Set cartesian vector that describes the normal to the layer structure. -->
+  <transportAxis x="0" y="0" z="1"/>
+
+  <!-- OPTIONAL. Specifies location where to write temperature profiles. -->
+  <!--           Directory is relative to current work directory. -->
+  <target directory="examples_output/steady_montecarlo1d/example3"/>
+
+</simulation>
+
+<spectralflux>
+    
+    <!-- Set number of phonon frequency bins -->
+    <resolution frequencybins="200"/>
+
+    <!-- Illustrates syntax to manually add locations at which the flux should be resolved -->
+    <!-- <location position="50"/> -->
+    <!-- <location position="150"/> -->
+    <!-- <location position="250"/> -->
+
+    <!-- Add a range of locations at which the flux should be resolved -->
+    <!-- Locations are expressed in nm. -->
+    <locationrange start="1" stop="299" step="1"/>
+    
+</spectralflux>

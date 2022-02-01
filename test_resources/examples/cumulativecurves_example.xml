@@ -1,0 +1,32 @@
+<cumulativecurves>
+
+  <!-- OPTIONAL. Specifies path to H5 repository. -->
+  <!-- Equals the launch directory when omitted. -->
+  <H5repository root_directory=".."/>
+
+  <!-- Specifies material information. -->
+  <!-- Directory is relative to H5 repository directory. -->
+  <compound directory="Si" base="Si" gridA="12" gridB="12" gridC="12"/>
+
+  <!-- Cartesian vector along which to resolve conductivity. -->
+  <transportAxis x="0" y="0" z="1"/>
+
+  <!-- Select desired quantities -->
+  <output conductivity="true" capacity="true"/>
+
+  <!-- Select desired independent variables. -->
+  <!-- MFP = mean free path; projMFP = MFP measured along transport axis; -->
+  <!-- RT = relaxation time; freq = frequency (nu); -->
+  <!-- angfreq = angular frequency (omega); energy = h*nu = hbar*omega -->
+  <resolveby MFP="true" projMFP="true" RT="true" freq="true" angfreq="true" energy="true"/>
+
+  <!-- OPTIONAL. Specifies number of points in each curve. (Default = 500). -->
+  <optionalsettings curvepoints="500"/>
+
+  <!-- OPTIONAL. Specifies desired directory for writing output. -->
+  <!-- When omitted, directory will be created automatically. -->
+  <!-- (Filenames are always generated automatically.) -->
+  <!-- Directory is relative to launch directory. -->
+  <target directory="examples_output/cumulativecurves/Si"/>
+
+</cumulativecurves>
