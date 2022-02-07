@@ -1,0 +1,3 @@
+Compound: phosphorene
+2nd IFC supercell: (n1,n2,n3) = 10 10 1
+3rd IFC supercell: (n1',n2',n3', cutoff) = 10 10 1 -6

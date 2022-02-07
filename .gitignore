@@ -1,7 +1,6 @@
 BUILD
 BUILD*
 build
-build2
 external
 .project
 *.h5
@@ -9,7 +8,6 @@ external
 .kdev4
 prealma.kdev4
 files.zip
-_metadata
 .clang_complete
 .vscode
 examples_output
