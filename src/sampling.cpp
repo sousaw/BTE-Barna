@@ -423,6 +423,8 @@ double layer_coupling::get_injection_rate(Eigen::VectorXcd& wfin_,
             std::max({1.0 - std::accumulate(OUT.begin(), OUT.end(), 0.), 0.});
 
         IN.push_back(leftIN);
+	IN.push_back(0.);
+	OUT.push_back(0.);
         OUT.push_back(leftOUT);
         return JSDm1(IN, OUT);
     }
