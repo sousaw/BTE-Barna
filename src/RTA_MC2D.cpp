@@ -1483,7 +1483,6 @@ void evolparticle(
 
         particle.pos = rnew;
         particle.t += dt;
-        dt = 0.;
 
         /// Make here the contribution to the segment
         process_segment(particle.boxid,
@@ -1501,8 +1500,9 @@ void evolparticle(
                         true);
 
 
-        /// Scattering here (serial because of rng protection):
         auto mat = sys[particle.boxid].material;
+        
+        dt = 0.;        
 
         return;
     }
@@ -1662,6 +1662,7 @@ void evolparticle(
         particle.q = newmode.second;
         particle.alpha = newmode.first;
         
+        ///Relaxation event (diffuse boundary)
         dt = 0.;
         pmutex.lock();
         particles.push_back(particle);
@@ -1691,6 +1692,8 @@ void evolparticle(
             pmutex.lock();
             particles.push_back(particle);
             pmutex.unlock();
+            ///Relaxation event interface scattering
+            dt = 0.;
             return;
         }
         else { /// Same material
@@ -1714,12 +1717,9 @@ void evolparticle(
             if (cboxes.find(particle.boxid) == cboxes.end()) {
                 throw alma::geometry_error("Teleport is not allowed");
             }
+            
+            return;
         }
-
-        // std::cout << "#boxchange" << std::endl;
-        // evolparticle(particle, v, sys, left_time, rnd,
-        // pmutex,db,grids,timegrid,gz,gz_jx,gz_jy,phi,DMM_gen,thickness,cells,material_sampler,particles,sd,couplings);
-        return;
     }
     else {
         // Make here the contribution to the segment
