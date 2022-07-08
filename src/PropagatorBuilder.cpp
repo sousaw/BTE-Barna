@@ -148,6 +148,7 @@ int main(int argc, char** argv) {
     /// symmetry and permutation. B is a huge matrix (it can be dozens of GBs)
     auto B =
         get_collision_operator_dense(*grid, *poscar, *anhIFC, Tambient, world);
+    world.barrier();
     alma::save_P(output_file + ".B.eigen.bin",B,world);    
     auto t3 = std::chrono::high_resolution_clock::now();
 
@@ -156,12 +157,11 @@ int main(int argc, char** argv) {
     /// Propagator calculation; this is done through krylov subspace
     Eigen::MatrixXd P;
     alma::build_P(B, P, dt, world);
-
+    world.barrier();
     auto t4 = std::chrono::high_resolution_clock::now();
 
     if (my_id == master)
         std::cout << std::endl << "Storing propagator" << std::endl;
-
     alma::save_P(output_file + ".P.eigen.bin", P, world);
 
     world.barrier();

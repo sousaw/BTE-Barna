@@ -934,7 +934,7 @@ void save_P(std::string fname,
     std::size_t master = 0;
     std::size_t my_id = world.rank();
     std::size_t nprocs = world.size();
-    if (nprocs > 1) {
+    if (nprocs > 1 and data.rows()!=data.cols()) {
         for (std::size_t iproc = 0; iproc < nprocs; iproc++) {
             if (my_id == iproc) {
                 if (my_id == master) {
@@ -1046,7 +1046,8 @@ void build_P(Eigen::MatrixXd& A,
         [&](tbb::blocked_range<std::size_t> colrange) {
             for (auto ii = colrange.begin(); ii < colrange.end(); ii++) {
                 coutmutex.lock();
-                std::cout << "#Exp " << colcount << "/" << A.cols()
+                if (world.rank()==0)
+                	std::cout << "#Exp " << colcount << "/" << A.cols()
                           << std::endl;
                 colcount++;
                 coutmutex.unlock();

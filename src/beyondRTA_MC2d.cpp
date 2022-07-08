@@ -1834,12 +1834,77 @@ public:
 };
 
 
+///Timer struct
+class timer {
+private:
+    
+    ///Map storing time information
+    mutable std::map<std::string,double> timetable;
+    
+    ///Internal time state
+    decltype(std::chrono::high_resolution_clock::now())
+        hour;
+    decltype(std::chrono::high_resolution_clock::now())
+        init_time;
+    
+public:
+    
+    timer(){
+        timetable["read_data"] = 0.;
+        timetable["advection"] = 0.;
+        timetable["generators"]= 0.;
+        timetable["scattering"]= 0.;
+        timetable["histogram"] = 0.;
+        timetable["saving"]    = 0.;
+        timetable["cancelling"]= 0.;
+        timetable["properties"]= 0.;
+        hour = std::chrono::high_resolution_clock::now();
+        init_time = std::chrono::high_resolution_clock::now();
+    }
+    
+    ///Here we set time:
+    void get_hour(){
+        hour = std::chrono::high_resolution_clock::now();
+    }
+    
+    ///Here we add time to report
+    void add_time(const std::string task) {
+        auto new_hour = std::chrono::high_resolution_clock::now();
+        
+        if (timetable.count(task)!=1)
+            throw alma::input_error("Error in time report ["+task+"] missing");
+        
+        timetable[task] += 
+            static_cast<std::chrono::duration<double>>(new_hour - hour).count();
+        hour = new_hour;
+    }
+    
+    
+    ///We print the time report
+    void print_report(){
+        
+        std::cout << "###################\n";
+        std::cout << "#TIME report:" << std::endl;
+        for (auto &[key,val] : timetable )
+            std::cout << " *" << key << " : " << val << " s " << std::endl;
+        auto final_time = std::chrono::high_resolution_clock::now();
+        double total_time = static_cast<std::chrono::duration<double>>(
+            final_time - init_time).count();
+        std::cout << "###################\n";
+        std::cout << "TOTAL TIME : " << total_time << " s " << std::endl;
+        std::cout << "###################\n";
+    }
+};
+
 
 ///Here we will generate
 
 int main(int argc, char** argv) {
     boost::mpi::environment env;
     boost::mpi::communicator world;
+    
+    ///Init timer
+    timer global_timer;
     
     if (world.size()>1) {
         std::cout << "Cannot run in MPI" << std::endl;
@@ -1876,8 +1941,6 @@ int main(int argc, char** argv) {
         throw alma::input_error("Two threads is the minum required");
     }
     
-    
-    
     tbb::global_control control(
         tbb::global_control::max_allowed_parallelism,
                                 nthreadsTBB);
@@ -1898,24 +1961,12 @@ int main(int argc, char** argv) {
     Eigen::MatrixXd gradients = 
         inpars.gradients;
     
-    //std::cout << gradients << std::endl;
-
-    
     ///Geometry
     std::vector<alma::geometry_2d>
         system;
     std::swap(inpars.system,system);
     auto nboxes =
         system.size();
-    
-//     std::cout << nboxes << std::endl;
-//     for (auto &s :  system) {
-//         std::cout << s.get_id() <<std::endl;
-//         std::cout << s.Teq << std::endl;
-//         std::cout << s.periodic << std::endl;
-//         if (s.periodic)
-//             std::cout << "T\n" << s.translation << std::endl;
-//     }
     
     std::vector<double>
         thicknesses;
@@ -2015,8 +2066,12 @@ int main(int argc, char** argv) {
     	    effs.begin(),effs.end()));
     }
     else {
-	Eeff = inpars.Edeviational;
+        Eeff = inpars.Edeviational;
     }
+    
+    
+    global_timer.add_time("read_data");
+    
     ///Print inf
     if (inpars.RTA)
         std::cout << "#RTA version activated\n";
@@ -2024,26 +2079,17 @@ int main(int argc, char** argv) {
     std::vector<alma::D_particle> particles;
     auto time = 0.;
     std::size_t istep = 0;
-    ///Some definitions:
-    using vpartIt = decltype(particles.begin());
-    std::function<vpartIt(vpartIt,
-                          vpartIt,
-                          std::size_t,
-                          std::size_t,
-                          int,
-                          std::size_t)> seeker = 
-                          search_Dparticle<vpartIt>;
-    std::mutex cerberus;
-    std::size_t pcancel_each = 4;//static_cast<std::size_t>(std::floor(2.5/dt) +1.0e-6);
     
-    std::unordered_map<
-        std::array<std::size_t,2>,
-        std::ptrdiff_t> particle_count;
+    ///Some definitions:
+    std::mutex cerberus;
+    ///TODO: Add possibility for user to tune it
+    std::size_t pcancel_each = 4; //static_cast<std::size_t>(std::floor(2.5/dt) +1.0e-6);
     
     std::vector<double> temperatures(system.size());
     for (auto &s : system)
         temperatures[s.get_id()] = s.Teq;
     
+    ///TODO: Add possibility for user to modify it
     saver Register("properties.msgpack.bin");
     
     ///Init particles from init given distributions
@@ -2060,9 +2106,13 @@ int main(int argc, char** argv) {
     std::cout << "#Init particles: "<< particles.size() << std::endl; 
     std::cout << "#Eeff is: "<< Eeff << " J" << std::endl;
     
+    global_timer.get_hour();
+    
     auto prop0 = calculate_prop(system_grid,system,vols,Eeff,system.size(),particles);
     auto flux0 = prop0.second;
     auto ed0   = prop0.first;
+    
+    global_timer.add_time("properties");
     
     std::cout << istep << '\t' << time << '\t' << particles.size()  << '\t';
     for (std::size_t ibox = 0; ibox < system.size(); ibox++)
@@ -2086,8 +2136,7 @@ int main(int argc, char** argv) {
     const auto sign_minus = alma::get_particle_sign(-1.0);
     
     while (time <= maxtime) {        
-        std::cout << "#Advection" << std::endl;
-        auto tA = std::chrono::high_resolution_clock::now();
+        global_timer.get_hour();
         ///Move particles until non-periodic boundary or the end
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, particles.size()),[&](tbb::blocked_range<std::size_t> ir) {
             for (auto i=ir.begin(); i<ir.end();i++){
@@ -2098,14 +2147,11 @@ int main(int argc, char** argv) {
                 evolparticle(particles[i],v,system,dt,rng_.local(),cerberus);
             }
         });
-        auto tB = std::chrono::high_resolution_clock::now();
-        std::cout << "#Advection  => DONE in "<< 
-        (static_cast<std::chrono::duration<double>>(tB - tA)).count()
-        << " s" << std::endl;
+        global_timer.add_time("advection");
         
         
-        std::cout << "#Generators" << std::endl;
         ///2.Add particle from source term and evolve it a random time
+        
         std::vector<alma::D_particle> grad_particles;
         grad_particles.reserve(particles.size());
         box_generators::source_term_gradient(
@@ -2120,6 +2166,8 @@ int main(int argc, char** argv) {
                              calc_gradients,
                              gradients);
         
+        global_timer.add_time("generators");
+        
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, grad_particles.size()),[&](tbb::blocked_range<std::size_t> ir) {
             for (auto i=ir.begin(); i<ir.end();i++){
                 auto mat = system[
@@ -2131,12 +2179,15 @@ int main(int argc, char** argv) {
             }
         });
         
-        std::cout <<"##Source term: " << grad_particles.size() << std::endl;  
+        ///std::cout <<"##Source term: " << grad_particles.size() << std::endl;  
+        
+        global_timer.add_time("advection");
         
         particles.insert( particles.end(),grad_particles.begin(), 
                           grad_particles.end());
         
         ///3. Add particles from Isothermal walls and evolve random time
+        
         std::vector<alma::D_particle> isowall_particles;
         box_generators::Isothermal_walls(
                          system,
@@ -2147,6 +2198,9 @@ int main(int argc, char** argv) {
                          thicknesses,
                          dt,
                          Eeff);
+        
+        global_timer.add_time("generators");
+        
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, isowall_particles.size()),[&](tbb::blocked_range<std::size_t> ir) {
             for (auto i=ir.begin(); i<ir.end();i++){
                 auto mat = system[
@@ -2157,11 +2211,15 @@ int main(int argc, char** argv) {
                 evolparticle(isowall_particles[i],v,system,rdt,rng_.local(),cerberus);
             }
         });
-        std::cout <<"##Isothermal walls: " << isowall_particles.size() << std::endl;
+        
+        global_timer.add_time("advection");
+        
+        ////std::cout <<"##Isothermal walls: " << isowall_particles.size() << std::endl;
         particles.insert( particles.end(),isowall_particles.begin(), 
                           isowall_particles.end());
         
         ///4. Add particles from adiabatic diffuse walls and evolve random time
+        
         std::vector<alma::D_particle> adiabatic_particles;
         box_generators::adiabatic_diffuse_walls(
                              system,
@@ -2173,6 +2231,8 @@ int main(int argc, char** argv) {
                              dt,
                              Eeff);
         
+        global_timer.add_time("generators");
+        
         tbb::parallel_for(tbb::blocked_range<std::size_t>(0, adiabatic_particles.size()),[&](tbb::blocked_range<std::size_t> ir) {
             for (auto i=ir.begin(); i<ir.end();i++){
                 auto mat = system[
@@ -2183,37 +2243,44 @@ int main(int argc, char** argv) {
                 evolparticle(adiabatic_particles[i],v,system,rdt,rng_.local(),cerberus);
             }
         });
-        std::cout << "##Adiabatic diffuse walls: " << adiabatic_particles.size() << std::endl;
+        
+        global_timer.add_time("advection");
+        
+        ///std::cout << "##Adiabatic diffuse walls: " << adiabatic_particles.size() << std::endl;
         particles.insert( particles.end(),adiabatic_particles.begin(), 
                           adiabatic_particles.end());
-        auto tC = std::chrono::high_resolution_clock::now();
-        std::cout << "#Generators => DONE in "<< 
-        (static_cast<std::chrono::duration<double>>(tC - tB)).count()
-        << " s" << std::endl;
+//         auto tC = std::chrono::high_resolution_clock::now();
+//         std::cout << "#Generators => DONE in "<< 
+//         (static_cast<std::chrono::duration<double>>(tC - tB)).count()
+//         << " s" << std::endl;
         
         ///Clean particles vector from those marked to delete
         delete_particles(particles);
         
         ///Scattering section
-        std::cout << "#Scattering" << std::endl;
+//         std::cout << "#Scattering" << std::endl;
+        
+        global_timer.get_hour();
+        
         if (inpars.RTA) {
             ScatteringRTA(particles,system,system_grid,system_cell,inpars.processes_map,dt,rng_,cerberus,world);            
         }
         else{
             Scattering(particles,system,system_P,system_grid,rng_,cerberus);
         }
-        auto tD = std::chrono::high_resolution_clock::now();
-        std::cout << "#Scattering => DONE in "<< 
-        (static_cast<std::chrono::duration<double>>(tD - tC)).count()
-        << " s" << std::endl;
-
+        
+//         std::cout << "#Scattering => DONE in "<< 
+//         (static_cast<std::chrono::duration<double>>(tD - tC)).count()
+//         << " s" << std::endl;
+        global_timer.add_time("scattering");
         ///Cancel section:
         bool cancel_flag = (istep % pcancel_each == 0);
-        std::cout << "#Canceling and save" << std::endl;
-
+        ///std::cout << "#Canceling and save" << std::endl;
+        
+        
         D_particle_map H(histosizes);
         
-        auto tD1 = std::chrono::high_resolution_clock::now();
+        //auto tD1 = std::chrono::high_resolution_clock::now();
 
         for (auto &p : particles) {
             auto ibox = p.boxid;
@@ -2221,7 +2288,9 @@ int main(int argc, char** argv) {
             H.histograma[ibox](p.q*nb+p.alpha) += static_cast<int>(p.sign);
         }
         
-        auto tD2 = std::chrono::high_resolution_clock::now();
+        //auto tD2 = std::chrono::high_resolution_clock::now();
+        
+        global_timer.add_time("histogram");
         
         if (cancel_flag) {
             
@@ -2297,22 +2366,25 @@ int main(int argc, char** argv) {
              });
              
              std::swap(particles,particles_);
+             global_timer.add_time("cancelling");
         }    
-        auto tD3 = std::chrono::high_resolution_clock::now();
+        //auto tD3 = std::chrono::high_resolution_clock::now();
         
         /// Properties are extracted from histograms
         auto prop = calculate_prop(system_grid,system,vols,Eeff,H);
         
-        auto tD4 = std::chrono::high_resolution_clock::now();
+        global_timer.add_time("properties");
+        
+        ///auto tD4 = std::chrono::high_resolution_clock::now();
         
         /// Save here the properties
         auto frame_saving = std::bind(&saver::save_frame,&Register,
                                       time+dt,Eeff,temperatures,H); 
         writer.push_job(frame_saving);
         
+        global_timer.add_time("saving");
         
-        
-        
+        /*
         auto tE = std::chrono::high_resolution_clock::now();
         std::cout << "###Canceling and saving=> DONE in "<< 
         (static_cast<std::chrono::duration<double>>(tE - tD)).count()
@@ -2333,7 +2405,7 @@ int main(int argc, char** argv) {
         << " s" << std::endl;
         std::cout << "###Saving "<< 
         (static_cast<std::chrono::duration<double>>(tE - tD4)).count()
-        << " s" << std::endl;
+        << " s" << std::endl;*/
         
         
         istep++;
@@ -2352,7 +2424,11 @@ int main(int argc, char** argv) {
         
     }
     
+    
     writer.finish();
+    global_timer.print_report();
+    
+    
     
     return EXIT_SUCCESS;
 }
