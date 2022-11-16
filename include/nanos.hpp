@@ -128,7 +128,7 @@ double calc_kappa_RTA(const alma::Crystal_structure& poscar,
 /// @param[in] grid - phonon spectrum on a regular q-point grid
 /// @param[in] syms - symmetry operations object
 /// @param[in] emission_processes   - list of 3-phonon emission processes
-/// @param[in] absorption_processes - list of 3-phonon  processes
+/// @param[in] absorption_processes - list of 3-phonon absorption processes
 /// @param[in] isotopic_processes   - list of 2-phonon processes
 /// @param[in] w0 - RTA scattering rates
 /// @param[in] uaxis - transport axis ( unitary vector )
@@ -155,6 +155,40 @@ double calc_kappa_nanos(
     double T,
     bool iterative,
     boost::mpi::communicator& world);
+
+
+/// Obtain the thermal conductivity of a nanowires system
+/// under the full BTE (beyond Relaxation Time Approximation).
+/// This is achieved by deterministic solution a linear system
+/// over full BZ. The elements are built from h5 (It is user responasibility
+/// to ensure its symmetry)
+/// @param[in] poscar - description of the unit cell
+/// @param[in] grid - phonon spectrum on a regular q-point grid
+/// @param[in] syms - symmetry operations object
+/// @param[in] threeph_processes - list of 3-phonon  processes
+/// @param[in] twoph_processes   - list of 2-phonon processes
+/// @param[in] w0 - RTA scattering rates
+/// @param[in] uaxis - transport axis ( unitary vector )
+/// @param[in] system_name - kind of nanosystem
+/// @param[in] limiting_length - the limiting length of the nanostructure [nm]
+/// @param[in] T - temperature in K
+/// @param[in] iterative - use iterative Eigen solver for faster computation
+/// @param[in] world - mpi communicator
+/// @return the thermal conductivity over transpot axis
+double calc_kappa_nanos(
+    const alma::Crystal_structure& poscar,
+    const alma::Gamma_grid& grid,
+    const alma::Symmetry_operations& syms,
+    std::vector<alma::Threeph_process>& threeph_processes,
+    std::vector<alma::Twoph_process>& twoph_processes,
+    const Eigen::Ref<const Eigen::ArrayXXd>& w0,
+    const Eigen::Ref<const Eigen::Vector3d>& uaxis,
+    const std::string& system_name,
+    const double limiting_length,
+    double T,
+    bool iterative,
+    boost::mpi::communicator& world);
+
 
 /// Get processes in full BZ
 /// @param[in] grid - phonon spectrum on a regular q-point grid

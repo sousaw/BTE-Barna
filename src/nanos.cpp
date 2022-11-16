@@ -901,5 +901,266 @@ double calc_kappa_nanos(
     return kappa_nano;
 
 } // end of calc_kappa_nanos
+
+
+
+
+double calc_kappa_nanos(
+    const alma::Crystal_structure& poscar,
+    const alma::Gamma_grid& grid,
+    const alma::Symmetry_operations& syms,
+    std::vector<alma::Threeph_process>& threeph_processes,
+    std::vector<alma::Twoph_process>& twoph_processes,
+    const Eigen::Ref<const Eigen::ArrayXXd>& w0,
+    const Eigen::Ref<const Eigen::Vector3d>& uaxis,
+    const std::string& system_name,
+    const double limiting_length,
+    double T,
+    bool iterative,
+    boost::mpi::communicator& world) {
+    // GATHER INFORMATION FOR FULL BTE SYSTEM AND DECLARE SOME VARIABLES
+
+    int Ngridpoints = grid.nqpoints;
+
+    int Nbranches = grid.get_spectrum_at_q(0).omega.size();
+    int Ntot = Ngridpoints * Nbranches - 3;
+
+    // Unknowns in the linear system
+    Eigen::VectorXd H(Ntot);
+
+    // stores heat capacities of the irreducible points
+    Eigen::VectorXd C(Ntot);
+    C.setConstant(0.0);
+
+    // stores relaxation times of the irreducible points
+    Eigen::VectorXd tau(Ntot);
+    tau.setConstant(0.0);
+
+    // stores phonon frequencies of the irreducible points
+    Eigen::VectorXd omega(Ntot);
+    omega.setConstant(0.0);
+
+    // stores group velocity vectors of the irreducible points
+    Eigen::MatrixXd vg(Ntot, 3);
+    Eigen::VectorXd vgproj(Ntot);
+    vg.fill(0.0);
+
+    // GATHER PHONON PROPERTIES FOR IRREDUCIBLE Q-POINTS
+
+    double C_factor = 1e27 * alma::constants::kB / Ngridpoints / poscar.V;
+
+    // scan over all points in the grid
+
+    for (int nq = 0; nq < Ngridpoints; nq++) {
+        // spectrum at point
+
+        auto spectrum = grid.get_spectrum_at_q(nq);
+
+
+        for (int nbranch = 0; nbranch < Nbranches; nbranch++) {
+            int imode = nq * Nbranches + nbranch - 3;
+
+            if (imode < 0)
+                continue;
+
+            // store heat capacity
+            C(imode) = C_factor *
+                       alma::bose_einstein_kernel(spectrum.omega[nbranch], T);
+
+
+            // store group velocity vector and projected one
+            Eigen::Vector3d myvg = spectrum.vg.col(nbranch);
+            vg(imode, 0) = myvg(0);
+            vg(imode, 1) = myvg(1);
+            vg(imode, 2) = myvg(2);
+
+            vgproj(imode) = myvg.dot(uaxis);
+
+            // store relaxation time
+            double mytau =
+                (w0(nbranch, nq) == 0.) ? 0. : (1. / w0(nbranch, nq));
+
+            if (system_name == "nanowire") {
+                mytau = scale_tau_nanowire(mytau, uaxis, myvg, limiting_length);
+            }
+            else if (system_name == "nanoribbon") {
+                mytau =
+                    scale_tau_nanoribbon(mytau, uaxis, myvg, limiting_length);
+            }
+            else {
+                std::cout
+                    << "ERROR: calc_kappa_nanos not recognized system_name"
+                    << std::endl;
+                exit(1);
+            }
+
+            tau(imode) = mytau;
+
+            // store phonon frequency
+            omega(imode) = spectrum.omega(nbranch);
+        }
+    }
+
+    typedef std::array<int, 2> idx_pair;
+
+    std::unordered_map<idx_pair, double> A_elements;
+    A_elements.reserve(std::ceil(0.15 * Ntot * Ntot));
+
+    // CALCULATE NON-RTA CONDUCTIVITY BY SOLVING LINEAR SYSTEM
+
+
+
+
+
+    // build the list of Gamma values for 2-phonon processes
+    for (auto& process_block : isotopic_processes) {
+        auto I = process_block.first.first;
+        auto J = process_block.first.second;
+        A_elements[{static_cast<int>(I - 3), static_cast<int>(J - 3)}] -=
+            process_block.second * tau(I - 3);
+    } // done scanning over all 2-phonon processes
+
+    for (auto& process_block : absorption_processes) {
+        auto process(process_block.second);
+        auto I = process.q[0] * Nbranches + process.alpha[0];
+        auto J = process.q[1] * Nbranches + process.alpha[1];
+        auto K = process.q[2] * Nbranches + process.alpha[2];
+
+        double Gamma = process.compute_gamma(grid, T, true);
+
+        A_elements[{static_cast<int>(I - 3), static_cast<int>(J - 3)}] +=
+            Gamma * tau(I - 3);
+        A_elements[{static_cast<int>(I - 3), static_cast<int>(K - 3)}] -=
+            Gamma * tau(I - 3);
+    }
+
+
+    for (auto& process_block : emission_processes) {
+        auto process(process_block.second);
+        auto I = process.q[0] * Nbranches + process.alpha[0];
+        auto J = process.q[1] * Nbranches + process.alpha[1];
+        auto K = process.q[2] * Nbranches + process.alpha[2];
+
+        double Gamma = process.compute_gamma(grid, T, true);
+
+        A_elements[{static_cast<int>(I - 3), static_cast<int>(J - 3)}] -=
+            0.5 * Gamma * tau(I - 3);
+        A_elements[{static_cast<int>(I - 3), static_cast<int>(K - 3)}] -=
+            0.5 * Gamma * tau(I - 3);
+    }
+
+
+    // diagonal elements in the system
+    for (int diag_idx = 0; diag_idx < Ntot; diag_idx++) {
+        A_elements[{diag_idx, diag_idx}] += 1.0;
+    }
+
+
+    /// Get tripletList
+    std::vector<Eigen::Triplet<double>> tripletList;
+    for (auto& [key, val] : A_elements) {
+        auto idx1 = key[0];
+        auto idx2 = key[1];
+        tripletList.push_back(Eigen::Triplet<double>(idx1, idx2, val));
+    }
+
+    // build system of equations "A*H = B"
+
+    Eigen::SparseMatrix<double> A(Ntot, Ntot);
+
+    // Fill sparse matrix
+    A.setFromTriplets(tripletList.begin(), tripletList.end());
+
+    Eigen::VectorXd B(Ntot);
+
+    // projected-components of omega*MFP_RTA over transport axis
+    B = omega.array() * tau.array() * vgproj.array();
+
+    // Transform to compressed format
+
+    A.makeCompressed();
+
+    std::cout << "#Linear system information\n";
+    std::cout << "**A sparsity "
+              << static_cast<double>(A.nonZeros()) / (Ntot * Ntot) << std::endl;
+    std::cout.flush();
+
+    // Scale system
+    Eigen::IterScaling<Eigen::SparseMatrix<double>> scal;
+    scal.computeRef(A);
+    B = scal.LeftScaling().cwiseProduct(B);
+
+    // SOLVE SYSTEM
+
+    if (iterative) {
+        Eigen::BiCGSTAB<Eigen::SparseMatrix<double>> solver;
+        // Eigen::GMRES<Eigen::SparseMatrix<double>> solver;
+        solver.compute(A);
+
+        // RTA solution to be used as initial guess
+        Eigen::VectorXd H_guess(Ntot);
+
+        H_guess = omega.array() * tau.array() * vgproj.array();
+
+        H_guess = scal.RightScaling().cwiseInverse().cwiseProduct(H_guess);
+
+        H = solver.solveWithGuess(B, H_guess);
+
+        std::cout << "# Iterative solver information:\n" << std::endl;
+        std::cout << "# -iterations:     " << solver.iterations() << std::endl;
+        std::cout << "# -estimated error: " << solver.error() << std::endl;
+    }
+
+    else {
+        H = omega.array() * tau.array() * vgproj.array();
+    }
+
+    double rel_err = (A * H - B).norm() / B.norm();
+
+    if (rel_err > 1e-3) {
+        std::cout << "alma::beyondRTA::calc_kappa_nanos > WARNING:"
+                  << std::endl;
+        std::cout << "solution of linear system might be unstable."
+                  << std::endl;
+        std::cout << "Relative error metric = " << rel_err << std::endl;
+    }
+
+    // Scale back the solution
+    H = scal.RightScaling().cwiseProduct(H);
+
+    // PROCESS THE LINEAR SYSTEM SOLUTION
+
+    // construct "generalised MFPs"
+    Eigen::VectorXd MFP_nonRTA(Ntot);
+    MFP_nonRTA = H.array() / omega.array();
+
+    // fix potential NaN/Inf problems
+    for (int n = 0; n < Ntot; n++) {
+        if (omega(n) <= 0.0) {
+            MFP_nonRTA(n) = 0.0;
+        }
+    }
+
+    // CALCULATE NON-RTA CONDUCTIVITY
+
+    double kappa_nano = 0.0;
+    for (int nq = 0; nq < Ngridpoints; nq++) {
+        for (int nbranch = 0; nbranch < Nbranches; nbranch++) {
+            int imode = nq * Nbranches + nbranch - 3;
+
+            if (imode < 0)
+                continue;
+
+            kappa_nano += 1e-6 * C(imode) * MFP_nonRTA(imode) * vgproj(imode);
+        }
+    }
+
+    // RETURN RESULT
+    return kappa_nano;
+
+} // end of calc_kappa_nanos
+
+
+
 } // namespace nanos
 } // end of namespace alma
