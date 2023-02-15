@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
     const double prefactor =
         1e27 * alma::constants::kB / grid->nqpoints / poscar->V;
 
-    Eigen::Matrix3d kappa_RTA = alma::calc_kappa(*poscar, *grid, w0, Tambient);
+    Eigen::Matrix3d kappa_RTA = alma::calc_kappa(*poscar,*grid,*syms, w0, Tambient);
     Eigen::Matrix3d invkappa_RTA;
     invkappa_RTA.setZero();
     for (auto axis : {0,1,2}) {

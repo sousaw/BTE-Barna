@@ -118,7 +118,7 @@ public:
     double getDominantRT();
 
     /// Compute the anisotropy index kappa_max/kappa_min and retrieve it.
-    double getAnisotropyIndex();
+    double getAnisotropyIndex(const alma::Symmetry_operations* syms);
 
     /// Choose resolving cumulative curves by MFP
     void resolveByMFP();

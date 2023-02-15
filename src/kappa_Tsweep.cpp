@@ -450,7 +450,7 @@ int main(int argc, char** argv) {
                 alma::calc_w0_threeph(*grid, *processes, T, world));
             Eigen::ArrayXXd w(w3 + w_elastic);
 
-            Eigen::Matrix3d kappa_RTA = alma::calc_kappa(*poscar, *grid, w, T);
+            Eigen::Matrix3d kappa_RTA = alma::calc_kappa(*poscar, *grid, *syms, w, T);
             Eigen::Matrix3d kappa_BTE;
 
             if (fullBTE) {

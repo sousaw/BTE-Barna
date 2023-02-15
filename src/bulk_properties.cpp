@@ -21,6 +21,7 @@
 namespace alma {
 Eigen::MatrixXd calc_kappa(const alma::Crystal_structure& poscar,
                            const alma::Gamma_grid& grid,
+			   const alma::Symmetry_operations& syms,
                            const Eigen::Ref<const Eigen::ArrayXXd>& w,
                            double T) {
     auto nequiv = grid.get_nequivalences();
@@ -52,7 +53,21 @@ Eigen::MatrixXd calc_kappa(const alma::Crystal_structure& poscar,
                 alma::bose_einstein_kernel(sp0.omega[im], T) * tau * outer;
         }
     }
-    return (1e21 * alma::constants::kB / poscar.V / grid.nqpoints) * nruter;
+
+    nruter = (1e21 * alma::constants::kB / poscar.V / grid.nqpoints) * nruter;
+
+    /// Symmetrise kappa tensor 
+
+    Eigen::Matrix3d nruter_accumulated;
+    nruter_accumulated.fill(0.0);
+
+    for (std::size_t nsymm = 0; nsymm < syms.get_nsym(); nsymm++) {
+        nruter_accumulated += syms.rotate_m<double>(nruter, nsymm, true);
+    }
+
+    nruter = nruter_accumulated / static_cast<double>(syms.get_nsym());
+
+    return nruter;
 }
 
 Eigen::ArrayXd calc_l2_RTAisotropic(const alma::Crystal_structure& poscar,
