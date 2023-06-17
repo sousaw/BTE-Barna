@@ -72,12 +72,14 @@ namespace nanos {
 /// @param[in] tau0 - bulk lifetime
 /// @param[in] uaxis - transport axis ( unitary vector )
 /// @param[in] vel - phonon velocity
-/// @param[in] R - nanowire radii
+/// @param[in] R - nanowire radius
+/// @param[in] nx  - number of points for integration
 /// @return scaled tau
 double scale_tau_nanowire(double tau0,
                           const Eigen::Ref<const Eigen::Vector3d>& uaxis,
                           const Eigen::Ref<const Eigen::Vector3d>& vel,
-                          double R);
+                          double R,
+			  std::size_t nx = 5000);
 
 /// Obtain the scaled lifetime for nanoribbons(see Eq. 8 of
 /// 10.1103/PhysRevB.85.195436) the integral is

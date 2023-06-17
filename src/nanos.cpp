@@ -42,7 +42,8 @@ namespace nanos {
 double scale_tau_nanowire(double tau0,
                           const Eigen::Ref<const Eigen::Vector3d>& uaxis,
                           const Eigen::Ref<const Eigen::Vector3d>& vel,
-                          double R) {
+                          double R,
+                          std::size_t nx) {
     /// Calculate the velocity vector projected onto a
     /// plane with normal vector equal to uaxis
     Eigen::Vector3d vrho_xyz = vel - vel.dot(uaxis) * uaxis;
@@ -53,10 +54,24 @@ double scale_tau_nanowire(double tau0,
     if (alma::almost_equal(mfp, 0.)) {
         return tau0;
     }
-
-
-    return tau0 *
-           (1 - 2 / (R * R) * mfp * (mfp * (std::exp(-R / mfp) - 1) + R));
+    
+    ///  First analytical part of the integral
+    double S = -2.0 * mfp / ( alma::constants::pi * R ) + 1.0;
+    
+    /// The missing part \mathrm{\frac{M_{NW}}{\pi R^2}\int_{-R}^{R}e^\frac{-2\sqrt{R^2-x^2}}{M_{NW}}dx =
+    /// \frac{M_{NW}}{R}\left[I_1\left(\frac{2R}{M_{NW}}\right)-L_{-1}\left(\frac{2R}{M_{NW}}\right)\right ]}
+    /// with I_n and L_n being the n-th---1 and -1, respectively---order modified Bessel and Struve functions.
+    /// Numerical implementation based on such functions is full of numerical noise for 2*R/M_{NW} > 25
+    /// thus is better to evaluate it numerically
+    
+    auto dr = R / nx;
+    auto R2 = R * R;
+    for (std::size_t  ix = 0 ; ix < nx ; ix++) {
+        auto x = (ix + 0.5) * dr;
+        S += 2.0 * mfp/(alma::constants::pi * R2) * std::exp( -2.0*std::sqrt(R2 - x*x )/mfp) * dr;
+    }
+    
+    return tau0 * S;
 }
 
 double scale_tau_nanoribbon(double tau0,
