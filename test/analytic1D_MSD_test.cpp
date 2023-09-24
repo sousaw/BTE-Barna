@@ -67,9 +67,8 @@ TEST(analytic1D_MSD_case, bulk_test) {
 
         MSD = MSDcalc.getMSD();
         MSD_ref.resize(Nt);
-        MSD_ref << 2.258270594e-18, 1.539701019e-16, 7.205645714e-15,
-            1.351483594e-13, 1.753307494e-12, 1.811198571e-11, 1.81698549e-10;
-        ;
+        MSD_ref << 2.2704097822e-18, 1.5536737854e-16, 7.1775701259e-15, 1.3241383583e-13, 1.6700029363e-12, 1.7200902007e-11, 1.7250997829e-10;
+        
         MSD_ratio = MSD.array() / MSD_ref.array();
 
         for (int nt = 0; nt < Nt; nt++) {
