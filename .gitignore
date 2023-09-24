@@ -3,7 +3,6 @@ BUILD*
 build
 external
 .project
-*.h5
 *.user
 .kdev4
 prealma.kdev4

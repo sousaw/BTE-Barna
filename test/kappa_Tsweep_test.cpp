@@ -100,8 +100,9 @@ TEST(kappa_Tsweep_case, kappa_Tsweep_test) {
     std::cout << "data =" << std::endl << data.format(fmt) << std::endl;
 
     Eigen::MatrixXd data_ref(3, 4);
-    data_ref << 300, 135.282, 141.295, 1625830, 400, 97.9002, 102.868, 1782430,
-        500, 77.2684, 81.482, 1864400;
+    data_ref << 300, 129.202, 135.016, 1.62583e+06,
+                400, 93.3664, 98.2288, 1.78243e+06,
+                500, 73.6293, 77.7717, 1.86440e+06;
 
     for (int ncol = 0; ncol < 4; ncol++) {
         double residue = (data.col(ncol) - data_ref.col(ncol)).norm() /

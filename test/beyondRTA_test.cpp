@@ -17,6 +17,7 @@
 /// conductivity tensor of wurtzite GaN under the full BTE.
 
 #include <iostream>
+#include <iomanip>
 #include <functional>
 #include <boost/filesystem.hpp>
 #include <boost/mpi.hpp>
@@ -31,6 +32,7 @@
 TEST(beyondRTA_case, beyondRTA_test) {
     boost::mpi::environment env;
     boost::mpi::communicator world;
+    auto myrank = world.rank();
 
     // load information
     auto basedir = boost::filesystem::path(TEST_RESOURCE_DIR);
@@ -71,9 +73,9 @@ TEST(beyondRTA_case, beyondRTA_test) {
     Eigen::ArrayXXd w0(w3 + w2);
 
     // target results
-    double kapparef_xx = 178.7125556;
-    double kapparef_yy = 178.7125556;
-    double kapparef_zz = 190.0217278;
+    double kapparef_xx = 179.53063355; 
+    double kapparef_yy = 179.53063355; 
+    double kapparef_zz = 181.66460879;
 
     // test beyondRTA conductivity from iterative Eigen solver
     Eigen::Matrix3d kappa1 = alma::beyondRTA::calc_kappa(*poscar,
@@ -85,12 +87,14 @@ TEST(beyondRTA_case, beyondRTA_test) {
                                                          Tref,
                                                          true,
                                                          world);
-
-    EXPECT_TRUE(alma::almost_equal(kapparef_xx, kappa1(0, 0), 1e-8, 1e-3));
-    EXPECT_TRUE(alma::almost_equal(kapparef_yy, kappa1(1, 1), 1e-8, 1e-3));
-    EXPECT_TRUE(alma::almost_equal(kapparef_zz, kappa1(2, 2), 1e-8, 1e-3));
-    kappa1(0, 0) = kappa1(1, 1) = kappa1(2, 2) = 0.0;
-    EXPECT_TRUE(alma::almost_equal(kappa1.norm(), 0., 1e-13, 0.));
+    
+    if (myrank == 0) {
+        EXPECT_TRUE(alma::almost_equal(kapparef_xx, kappa1(0, 0), 1e-8, 1e-3));
+        EXPECT_TRUE(alma::almost_equal(kapparef_yy, kappa1(1, 1), 1e-8, 1e-3));
+        EXPECT_TRUE(alma::almost_equal(kapparef_zz, kappa1(2, 2), 1e-8, 1e-3));
+        kappa1(0, 0) = kappa1(1, 1) = kappa1(2, 2) = 0.0;
+        EXPECT_TRUE(alma::almost_equal(kappa1.norm(), 0., 1e-13, 0.));
+    }
 
     // test beyondRTA conductivity from LU Eigen solver
     Eigen::Matrix3d kappa2 = alma::beyondRTA::calc_kappa(*poscar,
@@ -102,24 +106,27 @@ TEST(beyondRTA_case, beyondRTA_test) {
                                                          Tref,
                                                          false,
                                                          world);
-
-    EXPECT_TRUE(alma::almost_equal(kapparef_xx, kappa2(0, 0), 1e-8, 1e-3));
-    EXPECT_TRUE(alma::almost_equal(kapparef_yy, kappa2(1, 1), 1e-8, 1e-3));
-    EXPECT_TRUE(alma::almost_equal(kapparef_zz, kappa2(2, 2), 1e-8, 1e-3));
-    kappa2(0, 0) = kappa2(1, 1) = kappa2(2, 2) = 0.0;
-    EXPECT_TRUE(alma::almost_equal(kappa2.norm(), 0., 1e-13, 0.));
+    if (myrank == 0) {
+        EXPECT_TRUE(alma::almost_equal(kapparef_xx, kappa2(0, 0), 1e-8, 1e-3));
+        EXPECT_TRUE(alma::almost_equal(kapparef_yy, kappa2(1, 1), 1e-8, 1e-3));
+        EXPECT_TRUE(alma::almost_equal(kapparef_zz, kappa2(2, 2), 1e-8, 1e-3));
+        kappa2(0, 0) = kappa2(1, 1) = kappa2(2, 2) = 0.0;
+        EXPECT_TRUE(alma::almost_equal(kappa2.norm(), 0., 1e-13, 0.));
+    }
 
     // test the ShengBTE-like iterator
-    double kapparef_xx_sheng = 178.7104296;
-    double kapparef_yy_sheng = 178.6955812;
-    double kapparef_zz_sheng = 203.9714615;
+    double kapparef_xx_sheng = 179.54555271;
+    double kapparef_yy_sheng = 179.54555271;
+    double kapparef_zz_sheng = 201.73525076;
     Eigen::Matrix3d kappa3 = alma::calc_shengbte_kappa(
         *poscar, *grid, syms, three_ph_procs, two_ph_procs, Tref, world);
-
-    EXPECT_TRUE(
-        alma::almost_equal(kapparef_xx_sheng, kappa3(0, 0), 1e-8, 1e-3));
-    EXPECT_TRUE(
-        alma::almost_equal(kapparef_yy_sheng, kappa3(1, 1), 1e-8, 1e-3));
-    EXPECT_TRUE(
-        alma::almost_equal(kapparef_zz_sheng, kappa3(2, 2), 1e-8, 1e-3));
+    if (myrank == 0) {
+        EXPECT_TRUE(
+            alma::almost_equal(kapparef_xx_sheng, kappa3(0, 0), 1e-8, 1e-3));
+        EXPECT_TRUE(
+            alma::almost_equal(kapparef_yy_sheng, kappa3(1, 1), 1e-8, 1e-3));
+        EXPECT_TRUE(
+            alma::almost_equal(kapparef_zz_sheng, kappa3(2, 2), 1e-8, 1e-3));
+    }
+    world.barrier();
 }

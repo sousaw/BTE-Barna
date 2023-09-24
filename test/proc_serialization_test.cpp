@@ -60,7 +60,7 @@ TEST(proc_serialization_case, proc_serialization_test) {
         }
         // Check that the total number of processes that we got is the
         // same as in processes_test.
-        EXPECT_NEAR(79818u + 95900u, ntotal, test_tolerance);
+        EXPECT_NEAR(115712u + 113394u, ntotal, test_tolerance);
     }
     else {
         world.send(0, 0, processes);

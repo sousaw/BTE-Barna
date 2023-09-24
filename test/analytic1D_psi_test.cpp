@@ -69,7 +69,7 @@ TEST(analytic1D_psi_case, bulk100_test) {
         Eigen::VectorXd psi100 = psiCalc.getPsi();
 
         Eigen::VectorXd psi100_ref(4);
-        psi100_ref << 1.000585888, 0.9864015985, 0.4049977681, 0.005287157147;
+        psi100_ref << 1.0005862014, 0.9891810534, 0.42350460855, 0.0055728028315;
         Eigen::VectorXd ratio100 = psi100.array() / psi100_ref.array();
 
         for (int nxi = 0; nxi < Nxi; nxi++) {
@@ -120,7 +120,7 @@ TEST(analytic1D_psi_case, bulk110_test) {
         Eigen::VectorXd psi110 = psiCalc.getPsi();
 
         Eigen::VectorXd psi110_ref(4);
-        psi110_ref << 1.000585549, 0.9834471977, 0.3966867118, 0.005560183293;
+        psi110_ref << 1.0005857325, 0.9852980765, 0.41651934524, 0.0058672714937;
         Eigen::VectorXd ratio110 = psi110.array() / psi110_ref.array();
 
         for (int nxi = 0; nxi < Nxi; nxi++) {
@@ -171,9 +171,10 @@ TEST(analytic1D_psi_case, bulk111_test) {
         Eigen::VectorXd psi111 = psiCalc.getPsi();
 
         Eigen::VectorXd psi111_ref(4);
-        psi111_ref << 1.000585193, 0.981217029, 0.4013087323, 0.006630052249;
+        psi111_ref << 1.0005855762, 0.98450885214, 0.42262891854, 0.0070084592883;
         Eigen::VectorXd ratio111 = psi111.array() / psi111_ref.array();
-
+        std::cout.precision(11);
+        std::cout << psi111.transpose() << std::endl; 
         for (int nxi = 0; nxi < Nxi; nxi++) {
             EXPECT_NEAR(ratio111(nxi), 1.0, 5e-3);
         }

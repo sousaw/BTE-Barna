@@ -64,10 +64,10 @@ TEST(processes_case, processes_test) {
         auto nprocs = std::accumulate(all_nprocs.begin(), all_nprocs.end(), 0);
         auto nemission =
             std::accumulate(all_nemission.begin(), all_nemission.end(), 0);
-        EXPECT_NEAR(79818u, nprocs - nemission, test_tolerance);
-        EXPECT_NEAR(95900u, nemission, test_tolerance);
+        EXPECT_NEAR(115712u, nprocs - nemission, test_tolerance);
+        EXPECT_NEAR(113394u, nemission, test_tolerance);
     }
-
+    
     // And then do the same test for a inhomogeneous grid.
     grid = std::make_unique<alma::Gamma_grid>(
         *poscar, syms, *force_constants, 12, 12, 11);
@@ -83,12 +83,12 @@ TEST(processes_case, processes_test) {
     boost::mpi::gather(world, my_nprocs, all_nprocs, 0);
     all_nemission.clear();
     boost::mpi::gather(world, my_nemission, all_nemission, 0);
-
+    
     if (my_id == 0) {
         auto nprocs = std::accumulate(all_nprocs.begin(), all_nprocs.end(), 0);
         auto nemission =
             std::accumulate(all_nemission.begin(), all_nemission.end(), 0);
-        EXPECT_NEAR(475031u, nprocs - nemission, test_tolerance);
-        EXPECT_NEAR(563722u, nemission, test_tolerance);
+        EXPECT_NEAR(668087u, nprocs - nemission, test_tolerance);
+        EXPECT_NEAR(667662u, nemission, test_tolerance);
     }
 }

@@ -1,5 +1,5 @@
 Compound: C, graphene phase
 2nd IFC supercell: (n1,n2,n3) = 9 9 1
-3rd IFC supercell: (n1,n2,n3, cutoff) = 8 8 8 -10
+3rd IFC supercell: (n1,n2,n3, cutoff) = 8 8 1 -10
 # Added by J. Carrete on 2015-10-16
 # files.zip not available.

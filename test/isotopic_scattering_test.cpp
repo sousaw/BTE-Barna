@@ -43,26 +43,26 @@ TEST(isotopic_scattering_case, si_isotopes_test) {
     auto grid = std::move(std::get<3>(hdf5_data));
     auto threeph_processes = std::move(std::get<4>(hdf5_data));
 
-    double ref_pure[] = {262.5942,
-                         188.08561,
-                         147.67158,
-                         122.17161,
-                         104.50416,
-                         91.476633,
-                         81.437856,
-                         73.445211,
-                         66.919382,
-                         61.483531};
-    double ref_natural[] = {227.49185,
-                            168.89437,
-                            135.28229,
-                            113.38867,
-                            97.900208,
-                            86.306323,
-                            77.268422,
-                            70.005637,
-                            64.030131,
-                            59.020394};
+    double ref_pure[] = {249.21709531,
+                         178.55206587,
+                         140.19919058,
+                         115.99314240,
+                         99.220090845,
+                         86.851359212,
+                         77.320001020,
+                         69.731278562,
+                         63.535233274,
+                         58.374091685};
+    double ref_natural[] = {218.05920065,
+                            161.50922329,
+                            129.20154822,
+                            108.20226642,
+                            93.366456496,
+                            82.271732501,
+                            73.629286860,
+                            66.688382686,
+                            60.980508354,
+                            56.197143227};
 
     std::vector<double> Ts;
 
@@ -82,9 +82,8 @@ TEST(isotopic_scattering_case, si_isotopes_test) {
 
         if (my_id == 0) {
             auto kappa_pure =
-                alma::calc_kappa(*poscar, *grid, anharmonic_w0, T);
-            auto kappa_natural = alma::calc_kappa(*poscar, *grid, total_w0, T);
-
+                alma::calc_kappa(*poscar, *grid, *syms, anharmonic_w0, T);
+            auto kappa_natural = alma::calc_kappa(*poscar, *grid, *syms, total_w0, T);
             EXPECT_NEAR(
                 ref_pure[pos], kappa_pure(0, 0), 5e-3 * kappa_pure(0, 0));
             EXPECT_NEAR(
@@ -143,26 +142,26 @@ TEST(isotopic_scattering_case, sige_test) {
     // Note that these are not converged values. The Brillouin zone is
     // not adequately sampled by such a coarse grid. The values are only
     // intended to be quickly reproducible.
-    double ref_pure[] = {209.28311,
-                         153.57733,
-                         122.15775,
-                         101.83702,
-                         87.52949,
-                         76.864022,
-                         68.582445,
-                         61.952282,
-                         56.516531,
-                         51.974401};
-    double ref_natural[] = {3.0577846,
-                            3.0684651,
-                            3.0603444,
-                            3.0434214,
-                            3.0221372,
-                            2.9986542,
-                            2.9741031,
-                            2.9491094,
-                            2.9240331,
-                            2.8990882};
+    double ref_pure[] = {203.17579466,
+                         148.76624000,
+                         118.20176149,
+                         98.478721594,
+                         84.611079886,
+                         74.282735780,
+                         66.267821497,
+                         59.853941110,
+                         54.597199986,
+                         50.205722786};
+    double ref_natural[] = {3.0066381765,
+                            3.0151492643,
+                            3.0050757338,
+                            2.9864230091,
+                            2.9636042392,
+                            2.9387512037,
+                            2.9129692273,
+                            2.8868631463,
+                            2.8607771916,
+                            2.8349123902};
 
     std::vector<double> Ts;
 
@@ -181,10 +180,9 @@ TEST(isotopic_scattering_case, sige_test) {
 
         if (my_id == 0) {
             auto kappa_pure =
-                alma::calc_kappa(*vc_poscar, *grid, anharmonic_w0, T);
+                alma::calc_kappa(*vc_poscar, *grid, syms, anharmonic_w0, T);
             auto kappa_natural =
-                alma::calc_kappa(*vc_poscar, *grid, total_w0, T);
-
+                alma::calc_kappa(*vc_poscar, *grid, syms, total_w0, T);
             EXPECT_NEAR(
                 ref_pure[pos], kappa_pure(0, 0), 5e-3 * kappa_pure(0, 0));
             EXPECT_NEAR(ref_natural[pos],

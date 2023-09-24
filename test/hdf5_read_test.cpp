@@ -45,17 +45,17 @@ TEST(read_hdf5_case, read_hdf5_test) {
     auto grid = std::move(std::get<3>(hdf5_data));
     auto processes = std::move(std::get<4>(hdf5_data));
 
-    double reference[] = {262.594,
-                          188.086,
-                          147.672,
-                          122.172,
-                          104.504,
-                          91.4766,
-                          81.4379,
-                          73.4452,
-                          66.9194,
-                          61.4835};
-
+    double reference[] = {249.217,
+                          178.552,
+                          140.199,
+                          115.993,
+                          99.2201,
+                          86.8514,
+                          77.3200,
+                          69.7313,
+                          63.5352,
+                          58.3741};
+                          
     std::vector<double> Ts;
 
     for (auto i = 0; i < 10; ++i)
@@ -68,7 +68,7 @@ TEST(read_hdf5_case, read_hdf5_test) {
             alma::calc_w0_threeph(*grid, *processes, T, world));
 
         if (my_id == 0) {
-            auto kappa = alma::calc_kappa(*poscar, *grid, total_w0, T);
+            auto kappa = alma::calc_kappa(*poscar, *grid, *syms, total_w0, T);
             EXPECT_TRUE(
                 alma::almost_equal(reference[pos], kappa(0, 0), 1e-6, 5e-3));
             EXPECT_TRUE(

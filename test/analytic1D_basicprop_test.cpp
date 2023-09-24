@@ -58,7 +58,7 @@ TEST(analytic1D_basicprop_case, bulk_test) {
         // test bulk conductivity
         propCalc.setDirection(u100);
         double kappa = propCalc.getConductivity();
-        Eigen::MatrixXd kappamatrix = alma::calc_kappa(*poscar, *grid, w, T);
+        Eigen::MatrixXd kappamatrix = alma::calc_kappa(*poscar, *grid, *syms, w, T);
         Eigen::MatrixXd buffer =
             (u100.transpose()).matrix() * kappamatrix * u100.matrix();
         double kappa_ref = buffer(0);
@@ -111,12 +111,18 @@ TEST(analytic1D_basicprop_case, kappacumul_MFP_test) {
         propCalc.resolveByMFP();
         Eigen::VectorXd kappacumul_byMFP = propCalc.getCumulativeConductivity();
         Eigen::VectorXd kappacumul_ref1(Nbins);
-        kappacumul_ref1 << 0.09085889702, 0.9403198652, 4.278638123,
-            20.78872976, 63.55033952, 94.76717674, 98.89460337, 136.9234453,
-            147.6715806;
+        kappacumul_ref1 << 0.099702915218,
+                           0.955864463530,
+                           4.098706312900,
+                           19.86483910100,
+                           62.49076504100,
+                           92.06130318000,
+                           101.9906993000,
+                           126.9408107700,
+                           140.1991905800;
+
         Eigen::VectorXd ratiovector =
             kappacumul_byMFP.array() / kappacumul_ref1.array();
-
         for (int nbin = 0; nbin < Nbins; nbin++) {
             EXPECT_NEAR(ratiovector(nbin), 1.0, 5e-3);
         }
@@ -160,11 +166,18 @@ TEST(analytic1D_basicprop_case, kappacumul_RT_test) {
         propCalc.resolveByRT();
         Eigen::VectorXd kappacumul_byRT = propCalc.getCumulativeConductivity();
         Eigen::VectorXd kappacumul_ref2(Nbins);
-        kappacumul_ref2 << 0.4831467689, 3.143165535, 7.665954394, 32.35090534,
-            75.82629437, 90.79953246, 98.89460337, 125.379803, 147.6715806;
+        kappacumul_ref2 << 0.50512271878,
+                           3.16826782810,
+                           7.65116936700,
+                           32.9482682590,
+                           75.2219647080,
+                           91.3911283860,
+                           106.927025210,
+                           117.378452490,
+                           140.199190580;
+
         Eigen::VectorXd ratiovector =
             kappacumul_byRT.array() / kappacumul_ref2.array();
-
         for (int nbin = 0; nbin < Nbins; nbin++) {
             EXPECT_NEAR(ratiovector(nbin), 1.0, 5e-3);
         }
@@ -211,11 +224,10 @@ TEST(analytic1D_basicprop_case, thinfilm_crossplane_test) {
         }
 
         Eigen::VectorXd kappa_crossplane_ref(3);
-        kappa_crossplane_ref << 121.9813832, 76.32486756, 26.74947278;
+        kappa_crossplane_ref << 118.14104343, 75.336153421, 26.642091509;
 
         Eigen::VectorXd ratiovector =
             kappa_crossplane.array() / kappa_crossplane_ref.array();
-
         for (int nfilm = 0; nfilm < 3; nfilm++) {
             EXPECT_NEAR(ratiovector(nfilm), 1.0, 5e-3);
         }
